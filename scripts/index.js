@@ -4,21 +4,40 @@ document.addEventListener("DOMContentLoaded", (e) => {
     console.log(e.target, 'Страница прогружена !');
     /*_service-information_*/
 
+    const preloader = () => {
+        const hellopreloader = document.getElementById("hellopreloader_preload");
+
+        const fadeOutnojquery = (el) => {
+            el.style.opacity = 1;
+            const interhellopreloader = setInterval(() => {
+                el.style.opacity = el.style.opacity - 0.05;
+                if (el.style.opacity <= 0.05) {
+                    clearInterval(interhellopreloader);
+                    hellopreloader.style.display = "none";
+                }
+            }, 16);
+        }
+
+        window.onload = () => {
+            setTimeout(() => {
+                fadeOutnojquery(hellopreloader);
+            }, 200);
+        };
+    };
+
     const getData = (url, callback) => {
-        const request = new XMLHttpRequest();
-        request.open('GET', url);
-
-        request.addEventListener('readystatechange', () => {
-            if (request.readyState !== 4) return;
-            if (request.status === 200) {
-                const res = JSON.parse(request.response);
-                callback(res);
-            } else {
-                console.error(new Error('Ошибка:' + request.status));
-            }
-        });
-
-        request.send();
+        fetch(url)
+            .then((res) => {
+                if (res.ok) {
+                    console.log(res, 'Данные JSON прогружены !');
+                    return res.json();
+                }
+                throw new Error(res.statusText);
+            })
+            .then(callback)
+            .catch((err) => {
+                console.error(err);
+            });
     };
 
     const tabs = () => {
@@ -128,6 +147,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         const openModal = (event) => {
             const target = event.target;
             modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', escapeHandler);
             modalTitle.textContent = cardDetailsTitle.textContent;
             modalTitleSubmit.value = cardDetailsTitle.textContent;
@@ -142,12 +162,14 @@ document.addEventListener("DOMContentLoaded", (e) => {
         modal.addEventListener('click', (event) => {
             const target = event.target;
             if (target.classList.contains('modal__close') || target === modal) {
+                document.body.style.overflow = 'scroll';
                 modal.classList.remove('open');
             }
         });
 
         const escapeHandler = (event) => {
             if (event.code === 'Escape' || event.key === 'Escape' || event.keyCode === 27) {
+                document.body.style.overflow = 'scroll';
                 closeModal();
             }
         };
@@ -166,7 +188,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
                     <img class="cross-sell__image" src="${good.photo}" alt="${good.name}">
                     <h3 class="cross-sell__title">${good.name}</h3>
                     <p class="cross-sell__price">${good.price} ₽</p>
-                    <div class="button button_buy cross-sell__button">Купить</div>
+                    <button class="button button_buy cross-sell__button">Купить</button>
                 </article>
             `;
             return liItem;
@@ -181,6 +203,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         getData('cross-sell-dbase/dbase.json', createCrossSellList);
     };
 
+    preloader();
     tabs();
     accordion();
     modal();
