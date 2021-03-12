@@ -179,26 +179,40 @@ document.addEventListener("DOMContentLoaded", (e) => {
     };
 
     const renderCrossSell = () => {
+        const crossSellAdd = document.querySelector('.cross-sell__add');
         const crossSellList = document.querySelector('.cross-sell__list');
+        const allGoods = [];
+        const shuffle = arr => arr.sort(() => Math.random() - 0.3);
 
-        const createCrossSellItem = (good) => {
+        const createCrossSellItem = ({photo, name, price}) => {
             const liItem = document.createElement('li');
             liItem.innerHTML = `
                 <article class="cross-sell__item">
-                    <img class="cross-sell__image" src="${good.photo}" alt="${good.name}">
-                    <h3 class="cross-sell__title">${good.name}</h3>
-                    <p class="cross-sell__price">${good.price} ₽</p>
+                    <img class="cross-sell__image" src="${photo}" alt="${name}">
+                    <h3 class="cross-sell__title">${name}</h3>
+                    <p class="cross-sell__price">${price} ₽</p>
                     <button class="button button_buy cross-sell__button">Купить</button>
                 </article>
             `;
             return liItem;
         };
 
-        const createCrossSellList = (goods) => {
-            goods.forEach(item => {
+        const renderCrossSell = arr => {
+            arr.forEach(item => {
                 crossSellList.append(createCrossSellItem(item));
             });
+        }
+
+        const createCrossSellList = (goods = []) => {
+            allGoods.push(...shuffle(goods));
+            const fourItems = allGoods.splice(0, 4);
+            renderCrossSell(fourItems);
         };
+
+        crossSellAdd.addEventListener('click', () => {
+            renderCrossSell(allGoods);
+            crossSellAdd.remove();
+        });
 
         getData('cross-sell-dbase/dbase.json', createCrossSellList);
     };
@@ -208,4 +222,5 @@ document.addEventListener("DOMContentLoaded", (e) => {
     accordion();
     modal();
     renderCrossSell();
+    amenu('.header__menu', '.header-menu__list', '.header-menu__item', '.header-menu__burger');
 });
